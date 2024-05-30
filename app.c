@@ -31,6 +31,9 @@
 #include "app_assert.h"
 #include "sl_bluetooth.h"
 #include "app.h"
+#include "app_log.h"
+#include "temperature.h"
+#include "gatt_db.h"
 
 // The advertising set handle allocated from Bluetooth stack.
 static uint8_t advertising_set_handle = 0xff;
@@ -43,6 +46,8 @@ SL_WEAK void app_init(void)
   /////////////////////////////////////////////////////////////////////////////
   // Put your additional application init code here!                         //
   // This is called once during start-up.                                    //
+  app_log_info("%s\n",__FUNCTION__);
+
   /////////////////////////////////////////////////////////////////////////////
 }
 
@@ -67,6 +72,8 @@ SL_WEAK void app_process_action(void)
 void sl_bt_on_event(sl_bt_msg_t *evt)
 {
   sl_status_t sc;
+  int16_t temp;
+  uint16_t sent_len;
 
   switch (SL_BT_MSG_ID(evt->header)) {
     // -------------------------------
@@ -99,11 +106,19 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     // -------------------------------
     // This event indicates that a new connection was opened.
     case sl_bt_evt_connection_opened_id:
+      //log pour dire que déco
+      app_log_info("%s: connection_opened\n",__FUNCTION__);
+
+      app_log_info("%s: sensor init\n",__FUNCTION__);
       break;
 
     // -------------------------------
     // This event indicates that a connection was closed.
     case sl_bt_evt_connection_closed_id:
+
+      app_log_info("%s: not init\n",__FUNCTION__);
+      //log pour dire que déco
+      app_log_info("%s: connection_closed\n",__FUNCTION__);
       // Generate data for advertising
       sc = sl_bt_legacy_advertiser_generate_data(advertising_set_handle,
                                                  sl_bt_advertiser_general_discoverable);
@@ -118,7 +133,21 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     ///////////////////////////////////////////////////////////////////////////
     // Add additional event handlers here as your application requires!      //
     ///////////////////////////////////////////////////////////////////////////
+    case sl_bt_evt_gatt_server_user_read_request_id:
+      app_log_info("%s: temperature reading...\n",__FUNCTION__);
+      //on verifie que l'acces en lecture concerne bien la temperature
+      if(evt->data.evt_gatt_server_user_read_request.characteristic == gattdb_temperature){
+          app_log_info("Condition de lecture vérifiée\n");
+          temp = convertir_temp();
+          app_log_info("temperature is : %d C\n",temp);
+          sl_bt_gatt_server_send_user_read_response(evt->data.evt_gatt_server_user_read_request.connection
+                                                    ,gattdb_temperature,0,sizeof(temp),(const uint8_t*)&temp,& sent_len);
 
+          app_log_info("temperature envoyee");
+
+      }
+
+          break;
     // -------------------------------
     // Default event handler.
     default:
