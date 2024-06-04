@@ -6,6 +6,7 @@
  */
 #include "temperature.h"
 #include "sl_sensor_rht.h"
+#include "app_log.h"
 int32_t temperature;
 uint32_t humidite;
 
@@ -22,3 +23,9 @@ int convertir_temp(){
 }
 
 
+sl_sleeptimer_timer_callback_t callbackNotify(){
+ static uint8_t count = 0;
+  app_log_info("Timer step %u\n", count);
+  count +=1;
+
+}

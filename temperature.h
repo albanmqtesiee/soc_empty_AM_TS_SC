@@ -13,5 +13,6 @@
 //Réaliser la conversion de température
 
 int convertir_temp();
+sl_sleeptimer_timer_callback_t callbackNotify();
 
 #endif /* TEMPERATURE_H_ */

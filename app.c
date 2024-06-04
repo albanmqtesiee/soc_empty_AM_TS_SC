@@ -74,6 +74,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
   sl_status_t sc;
   int16_t temp;
   uint16_t sent_len;
+  sl_sleeptimer_timer_handle_t my_handle;
 
   switch (SL_BT_MSG_ID(evt->header)) {
     // -------------------------------
@@ -142,12 +143,29 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
           app_log_info("temperature is : %d C\n",temp);
           sl_bt_gatt_server_send_user_read_response(evt->data.evt_gatt_server_user_read_request.connection
                                                     ,gattdb_temperature,0,sizeof(temp),(const uint8_t*)&temp,& sent_len);
-
-          app_log_info("temperature envoyee");
+          app_log_info("temperature envoyee \n");
 
       }
 
           break;
+    case sl_bt_evt_gatt_server_characteristic_status_id:
+
+         if(evt->data.evt_gatt_server_user_read_request.characteristic == gattdb_temperature){
+             if(evt->data.evt_gatt_server_characteristic_status.status_flags == 0x01){
+                 if(evt->data.evt_gatt_server_characteristic_status.client_config_flags){
+                     sl_sleeptimer_start_periodic_timer_ms(&my_handle, 1000, callbackNotify, NULL, 0,0);
+
+                     //app_log_info("la carte est notify par temperature \n");
+                     //app_log_info("La valeur recue est %d \n", evt->data.evt_gatt_server_characteristic_status.client_config_flags);
+                 }
+                 app_log_info("La valeur recue est %d \n", evt->data.evt_gatt_server_characteristic_status.client_config_flags);
+
+             }
+
+         }
+
+         break;
+
     // -------------------------------
     // Default event handler.
     default:
