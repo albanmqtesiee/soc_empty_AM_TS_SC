@@ -8,11 +8,12 @@
 #ifndef TEMPERATURE_H_
 #define TEMPERATURE_H_
 
+#include "sl_sleeptimer.h"
 
 
 //Réaliser la conversion de température
 
 int convertir_temp();
-sl_sleeptimer_timer_callback_t callbackNotify();
+void  callbackNotify(sl_sleeptimer_timer_handle_t *handle, void *data);
 
 #endif /* TEMPERATURE_H_ */
