@@ -36,6 +36,10 @@
 #include "gatt_db.h"
 #include "sl_sleeptimer.h"
 
+#define TEMPERATURE_TIMER_SIGNAL (1<<0)
+
+
+
 
 void cb_fonction(sl_sleeptimer_timer_handle_t *handle, void *data)
 {
@@ -50,6 +54,8 @@ sl_sleeptimer_timer_handle_t my_handle;
 int16_t temp;
 uint16_t sent_len;
 
+uint16_t characteristic;
+uint8_t connection;
 /**************************************************************************//**
  * Application Init.
  *****************************************************************************/
@@ -159,7 +165,8 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
       }
 
-          break;
+    break;
+
     case sl_bt_evt_gatt_server_characteristic_status_id:
 
          if(evt->data.evt_gatt_server_user_read_request.characteristic == gattdb_temperature){
@@ -171,6 +178,7 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
                                                            NULL,
                                                            0,
                                                            0);
+
 
                      app_log_info("la carte est notify par temperature \n");
                      //app_log_info("La valeur recue est %d \n", evt->data.evt_gatt_server_characteristic_status.client_config_flags);
@@ -186,6 +194,15 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
          }
 
          break;
+
+    case sl_bt_evt_system_external_signal_id:
+      if(evt->data.evt_system_external_signal.extsignals == TEMPERATURE_TIMER_SIGNAL){
+          temp = convertir_temp();
+          app_log_info("temperature is : %d C\n",temp);
+          sl_bt_gatt_server_send_notification(evt->data.evt_gatt_server_user_read_request.connection
+                                                    ,gattdb_temperature,sizeof(temp),(const uint8_t*)&temp);
+      }
+      break;
 
     // -------------------------------
     // Default event handler.

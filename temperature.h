@@ -10,6 +10,9 @@
 
 #include "sl_sleeptimer.h"
 
+#define TEMPERATURE_TIMER_SIGNAL (1<<0)
+
+
 
 //Réaliser la conversion de température
 

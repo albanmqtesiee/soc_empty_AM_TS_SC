@@ -78,7 +78,10 @@ temperature.o: ../temperature.c \
  c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\emdrv\common\inc\ecode.h \
  c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\emlib\inc\em_ldma.h \
  C:\Users\Alban\SimplicityStudio\v5_workspace\soc_empty_AM_TS_SC\config/dmadrv_config.h \
- C:\Users\Alban\SimplicityStudio\v5_workspace\soc_empty_AM_TS_SC\config/app_log_config.h
+ C:\Users\Alban\SimplicityStudio\v5_workspace\soc_empty_AM_TS_SC\config/app_log_config.h \
+ c:\users\alban\simplicitystudio\sdks\gecko_sdk\protocol\bluetooth\inc\sl_bt_api.h \
+ c:\users\alban\simplicitystudio\sdks\gecko_sdk\protocol\bluetooth\inc\sl_bgapi.h \
+ c:\users\alban\simplicitystudio\sdks\gecko_sdk\protocol\bluetooth\inc\sl_bt_api_compatibility.h
 c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\common\toolchain\inc\sl_gcc_preinclude.h:
 ../temperature.h:
 c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\service\sleeptimer\inc\sl_sleeptimer.h:
@@ -159,3 +162,6 @@ c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\emdrv\common\inc\ecode.h
 c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\emlib\inc\em_ldma.h:
 C:\Users\Alban\SimplicityStudio\v5_workspace\soc_empty_AM_TS_SC\config/dmadrv_config.h:
 C:\Users\Alban\SimplicityStudio\v5_workspace\soc_empty_AM_TS_SC\config/app_log_config.h:
+c:\users\alban\simplicitystudio\sdks\gecko_sdk\protocol\bluetooth\inc\sl_bt_api.h:
+c:\users\alban\simplicitystudio\sdks\gecko_sdk\protocol\bluetooth\inc\sl_bgapi.h:
+c:\users\alban\simplicitystudio\sdks\gecko_sdk\protocol\bluetooth\inc\sl_bt_api_compatibility.h:
