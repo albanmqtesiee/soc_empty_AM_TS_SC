@@ -33,11 +33,11 @@
 #include "app.h"
 #include "app_log.h"
 #include "temperature.h"
+#include "irradiance.h"
 #include "gatt_db.h"
 #include "sl_sleeptimer.h"
 #include "sl_simple_led_instances.h"
 
-#define TEMPERATURE_TIMER_SIGNAL (1<<0)
 
 
 
@@ -51,14 +51,18 @@ void cb_fonction(sl_sleeptimer_timer_handle_t *handle, void *data)
 // The advertising set handle allocated from Bluetooth stack.
 static uint8_t advertising_set_handle = 0xff;
 sl_sleeptimer_timer_handle_t my_handle;
-
+sl_sleeptimer_timer_handle_t my_handle2;
 int16_t temp;
 uint16_t sent_len;
+uint16_t sent_len2;
 uint8_t* data;
 uint8_t taille;
+float irradiance;
 
-uint16_t characteristic;
-uint8_t connection;
+uint16_t characteristictemp;
+uint16_t characteristiclum;
+uint8_t connectiontemp;
+uint8_t connectionlum;
 /**************************************************************************//**
  * Application Init.
  *****************************************************************************/
@@ -156,9 +160,10 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     // Add additional event handlers here as your application requires!      //
     ///////////////////////////////////////////////////////////////////////////
     case sl_bt_evt_gatt_server_user_read_request_id:
-      app_log_info("%s: temperature reading...\n",__FUNCTION__);
+
       //on verifie que l'acces en lecture concerne bien la temperature
       if(evt->data.evt_gatt_server_user_read_request.characteristic == gattdb_temperature){
+          app_log_info("%s: temperature reading...\n",__FUNCTION__);
           app_log_info("Condition de lecture vérifiée\n");
           temp = convertir_temp();
           app_log_info("temperature is : %d C\n",temp);
@@ -168,16 +173,23 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
       }
       if(evt->data.evt_gatt_server_user_read_request.characteristic == gattdb_irradiance_0){
+          app_log_info("%s: irradiance reading...\n",__FUNCTION__);
+           irradiance = irrad();
+           sl_bt_gatt_server_send_user_read_response(evt->data.evt_gatt_server_user_read_request.connection
+                                                               ,gattdb_irradiance_0,0,sizeof(irradiance),(const uint8_t*)&irradiance,& sent_len2);
+                     app_log_info("irradiance envoyee \n");
 
       }
 
     break;
 
     case sl_bt_evt_gatt_server_characteristic_status_id:
+        //app_log_info("La valeur recue est %d \n", evt->data.evt_gatt_server_characteristic_status.client_config_flags);
 
-         if(evt->data.evt_gatt_server_user_read_request.characteristic == gattdb_temperature){
+         if(evt->data.evt_gatt_server_characteristic_status.characteristic == gattdb_temperature){
              if(evt->data.evt_gatt_server_characteristic_status.status_flags == 0x01){
                  if(evt->data.evt_gatt_server_characteristic_status.client_config_flags){
+                     app_log_info("Coucou je suis temperature\n");
                      sl_sleeptimer_start_periodic_timer_ms(&my_handle,
                                                            1000,
                                                            callbackNotify,
@@ -187,6 +199,8 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
 
                      app_log_info("la carte est notify par temperature \n");
+                     connectiontemp = evt->data.evt_gatt_server_characteristic_status.connection;
+                     characteristictemp = evt->data.evt_gatt_server_characteristic_status.characteristic;
                      //app_log_info("La valeur recue est %d \n", evt->data.evt_gatt_server_characteristic_status.client_config_flags);
                  }
                  //
@@ -199,15 +213,48 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
          }
 
+         if(evt->data.evt_gatt_server_characteristic_status.characteristic == gattdb_irradiance_0){
+                      if(evt->data.evt_gatt_server_characteristic_status.status_flags == 0x01){
+                          if(evt->data.evt_gatt_server_characteristic_status.client_config_flags){
+                              app_log_info("Coucou je suis irradiance\n");
+                              sl_sleeptimer_start_periodic_timer_ms(&my_handle2,
+                                                                    1000,
+                                                                    irradNotify,
+                                                                    NULL,
+                                                                    0,
+                                                                    0);
+
+
+                              app_log_info("la carte est notify par irradiance \n");
+                              connectionlum = evt->data.evt_gatt_server_characteristic_status.connection;
+                              characteristiclum = evt->data.evt_gatt_server_characteristic_status.characteristic;
+                              //app_log_info("La valeur recue est %d \n", evt->data.evt_gatt_server_characteristic_status.client_config_flags);
+                          }
+                          //
+                          else{
+                              sl_sleeptimer_stop_timer(&my_handle2);
+                          }
+                          //app_log_info("La valeur recue est %d \n", evt->data.evt_gatt_server_characteristic_status.client_config_flags);
+
+                      }
+
+                  }
+
          break;
 
     case sl_bt_evt_system_external_signal_id:
       if(evt->data.evt_system_external_signal.extsignals == TEMPERATURE_TIMER_SIGNAL){
           temp = convertir_temp();
           app_log_info("temperature is : %d C\n",temp);
-          sl_bt_gatt_server_send_notification(evt->data.evt_gatt_server_user_read_request.connection
+          sl_bt_gatt_server_send_notification(connectiontemp
                                                     ,gattdb_temperature,sizeof(temp),(const uint8_t*)&temp);
       }
+      else if(evt->data.evt_system_external_signal.extsignals == IRRADIANCE_TIMER_SIGNAL){
+                irradiance = irrad();
+                app_log_info("irradiance is : %d \n",(int)( 100*irradiance));
+                sl_bt_gatt_server_send_notification(connectionlum
+                                                          ,gattdb_irradiance_0,sizeof(irradiance),(const uint8_t*)&irradiance);
+            }
       break;
 
     case sl_bt_evt_gatt_server_user_write_request_id:
