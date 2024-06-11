@@ -90,7 +90,16 @@ app.o: ../app.c \
  c:\users\alban\simplicitystudio\sdks\gecko_sdk\protocol\bluetooth\inc\sl_bt_api_compatibility.h \
  ../app.h ../temperature.h \
  C:\Users\Alban\SimplicityStudio\v5_workspace\soc_empty_AM_TS_SC\autogen/gatt_db.h \
- c:\users\alban\simplicitystudio\sdks\gecko_sdk\protocol\bluetooth\inc\sli_bt_gattdb_def.h
+ c:\users\alban\simplicitystudio\sdks\gecko_sdk\protocol\bluetooth\inc\sli_bt_gattdb_def.h \
+ C:\Users\Alban\SimplicityStudio\v5_workspace\soc_empty_AM_TS_SC\autogen/sl_simple_led_instances.h \
+ c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\driver\leddrv\inc\sl_simple_led.h \
+ c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\driver\leddrv\inc\sl_led.h \
+ c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\emlib\inc\em_gpio.h \
+ c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\common\inc\sl_assert.h \
+ c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\emlib\inc\em_bus.h \
+ c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\emlib\inc\em_core.h \
+ c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\emlib\inc\em_core_generic.h \
+ C:\Users\Alban\SimplicityStudio\v5_workspace\soc_empty_AM_TS_SC\config/emlib_core_debug_config.h
 c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\common\toolchain\inc\sl_gcc_preinclude.h:
 c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\emlib\inc\em_common.h:
 c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\device\siliconlabs\efr32mg12p\include\em_device.h:
@@ -184,3 +193,12 @@ c:\users\alban\simplicitystudio\sdks\gecko_sdk\protocol\bluetooth\inc\sl_bt_api_
 ../temperature.h:
 C:\Users\Alban\SimplicityStudio\v5_workspace\soc_empty_AM_TS_SC\autogen/gatt_db.h:
 c:\users\alban\simplicitystudio\sdks\gecko_sdk\protocol\bluetooth\inc\sli_bt_gattdb_def.h:
+C:\Users\Alban\SimplicityStudio\v5_workspace\soc_empty_AM_TS_SC\autogen/sl_simple_led_instances.h:
+c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\driver\leddrv\inc\sl_simple_led.h:
+c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\driver\leddrv\inc\sl_led.h:
+c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\emlib\inc\em_gpio.h:
+c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\common\inc\sl_assert.h:
+c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\emlib\inc\em_bus.h:
+c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\emlib\inc\em_core.h:
+c:\users\alban\simplicitystudio\sdks\gecko_sdk\platform\emlib\inc\em_core_generic.h:
+C:\Users\Alban\SimplicityStudio\v5_workspace\soc_empty_AM_TS_SC\config/emlib_core_debug_config.h:

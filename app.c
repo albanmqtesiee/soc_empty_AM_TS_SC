@@ -35,6 +35,7 @@
 #include "temperature.h"
 #include "gatt_db.h"
 #include "sl_sleeptimer.h"
+#include "sl_simple_led_instances.h"
 
 #define TEMPERATURE_TIMER_SIGNAL (1<<0)
 
@@ -53,6 +54,8 @@ sl_sleeptimer_timer_handle_t my_handle;
 
 int16_t temp;
 uint16_t sent_len;
+uint8_t* data;
+uint8_t taille;
 
 uint16_t characteristic;
 uint8_t connection;
@@ -127,8 +130,8 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     case sl_bt_evt_connection_opened_id:
       //log pour dire que déco
       app_log_info("%s: connection_opened\n",__FUNCTION__);
-
-      app_log_info("%s: sensor init\n",__FUNCTION__);
+      sl_simple_led_init_instances();
+      app_log_info("%s: led init\n",__FUNCTION__);
       break;
 
     // -------------------------------
@@ -162,6 +165,9 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
           sl_bt_gatt_server_send_user_read_response(evt->data.evt_gatt_server_user_read_request.connection
                                                     ,gattdb_temperature,0,sizeof(temp),(const uint8_t*)&temp,& sent_len);
           app_log_info("temperature envoyee \n");
+
+      }
+      if(evt->data.evt_gatt_server_user_read_request.characteristic == gattdb_irradiance_0){
 
       }
 
@@ -203,6 +209,36 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
                                                     ,gattdb_temperature,sizeof(temp),(const uint8_t*)&temp);
       }
       break;
+
+    case sl_bt_evt_gatt_server_user_write_request_id:
+
+      taille = evt->data.evt_gatt_server_user_write_request.value.len;
+      data = evt->data.evt_gatt_server_user_write_request.value.data;
+      for(int i = 0; i < taille; i++){
+          if(data[i] == 1){
+              sl_led_led0.turn_on(sl_led_led0.context);
+          }
+          else if(data[i] == 0){
+              sl_led_led0.turn_off(sl_led_led0.context);
+          }
+          app_log_info("Donnee : %d \n", data[i]);
+          app_log_info("coucou la valeur c'est %d \n", evt->data.evt_gatt_server_user_write_request.att_opcode);
+      }
+      app_log_info("Coucou on ecrit !! \n");
+      if(evt->data.evt_gatt_server_user_write_request.att_opcode == sl_bt_gatt_write_request ){
+          app_log_info("Response is requested");
+          sl_bt_gatt_server_send_user_write_response(evt->data.evt_gatt_server_user_read_request.connection,
+                                                          evt->data.evt_gatt_server_user_read_request.characteristic,
+                                                                      0);
+
+      }
+      else if(evt->data.evt_gatt_server_user_write_request.att_opcode == sl_bt_gatt_write_command ){
+          app_log_info("No response required");
+      }
+
+      break;
+
+
 
     // -------------------------------
     // Default event handler.
