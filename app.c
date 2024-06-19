@@ -50,19 +50,19 @@ void cb_fonction(sl_sleeptimer_timer_handle_t *handle, void *data)
 }
 // The advertising set handle allocated from Bluetooth stack.
 static uint8_t advertising_set_handle = 0xff;
-sl_sleeptimer_timer_handle_t my_handle;
-sl_sleeptimer_timer_handle_t my_handle2;
-int16_t temp;
-uint16_t sent_len;
-uint16_t sent_len2;
-uint8_t* data;
-uint8_t taille;
-float irradiance;
+sl_sleeptimer_timer_handle_t my_handle;//adresse du timer pour callbackNotify
+sl_sleeptimer_timer_handle_t my_handle2;//adresse du timer pour irradNotify
+int16_t temp;//temperature convertie
+uint16_t sent_len;//taille de la temperature convertie
+uint16_t sent_len2;//taille de l irradiance covnertie
+uint8_t* data;//donnee recue
+uint8_t taille;//taille de la donnee
+float irradiance;//l irradiance recu
 
-uint16_t characteristictemp;
-uint16_t characteristiclum;
-uint8_t connectiontemp;
-uint8_t connectionlum;
+uint16_t characteristictemp;//caracteristique de la temperature apres chaque notification
+uint16_t characteristiclum;//caracteristique de l irradiance apres chaque notification
+uint8_t connectiontemp;//connexion utilisateur de la temperature apres chaque notification
+uint8_t connectionlum;//connexion utilisateur de l irradiance apres chaque notification
 /**************************************************************************//**
  * Application Init.
  *****************************************************************************/
@@ -159,53 +159,53 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     ///////////////////////////////////////////////////////////////////////////
     // Add additional event handlers here as your application requires!      //
     ///////////////////////////////////////////////////////////////////////////
-    case sl_bt_evt_gatt_server_user_read_request_id:
+    case sl_bt_evt_gatt_server_user_read_request_id://demande de lecture de l'utilisateur
 
-      //on verifie que l'acces en lecture concerne bien la temperature
+      //on verifie que l acces en lecture concerne bien la temperature
       if(evt->data.evt_gatt_server_user_read_request.characteristic == gattdb_temperature){
           app_log_info("%s: temperature reading...\n",__FUNCTION__);
           app_log_info("Condition de lecture vérifiée\n");
-          temp = convertir_temp();
-          app_log_info("temperature is : %d C\n",temp);
+          temp = convertir_temp();//conversion de la temperature
+          app_log_info("temperature is : %d C\n",temp);//affichage de la temperature dans les logs
           sl_bt_gatt_server_send_user_read_response(evt->data.evt_gatt_server_user_read_request.connection
-                                                    ,gattdb_temperature,0,sizeof(temp),(const uint8_t*)&temp,& sent_len);
+                                                    ,gattdb_temperature,0,sizeof(temp),(const uint8_t*)&temp,& sent_len);//envoie de la temperature a l utilisateur
           app_log_info("temperature envoyee \n");
 
       }
-      if(evt->data.evt_gatt_server_user_read_request.characteristic == gattdb_irradiance_0){
+      if(evt->data.evt_gatt_server_user_read_request.characteristic == gattdb_irradiance_0){//si l acces en lecture concerne l irradiance
           app_log_info("%s: irradiance reading...\n",__FUNCTION__);
-           irradiance = irrad();
+           irradiance = irrad();//conversion de l irradiance
            sl_bt_gatt_server_send_user_read_response(evt->data.evt_gatt_server_user_read_request.connection
-                                                               ,gattdb_irradiance_0,0,sizeof(irradiance),(const uint8_t*)&irradiance,& sent_len2);
+                                                               ,gattdb_irradiance_0,0,sizeof(irradiance),(const uint8_t*)&irradiance,& sent_len2);//envoie de l irradiance a l utilisateur
                      app_log_info("irradiance envoyee \n");
 
       }
 
     break;
 
-    case sl_bt_evt_gatt_server_characteristic_status_id:
+    case sl_bt_evt_gatt_server_characteristic_status_id://verification de la notification recue
         //app_log_info("La valeur recue est %d \n", evt->data.evt_gatt_server_characteristic_status.client_config_flags);
 
-         if(evt->data.evt_gatt_server_characteristic_status.characteristic == gattdb_temperature){
-             if(evt->data.evt_gatt_server_characteristic_status.status_flags == 0x01){
-                 if(evt->data.evt_gatt_server_characteristic_status.client_config_flags){
+         if(evt->data.evt_gatt_server_characteristic_status.characteristic == gattdb_temperature){//la notification concerne la temperature
+             if(evt->data.evt_gatt_server_characteristic_status.status_flags == 0x01){//changement detecte (appui de la cloche dans l app)
+                 if(evt->data.evt_gatt_server_characteristic_status.client_config_flags){//on demande la notification
                      app_log_info("Coucou je suis temperature\n");
                      sl_sleeptimer_start_periodic_timer_ms(&my_handle,
                                                            1000,
-                                                           callbackNotify,
+                                                           callbackNotify,//fonction de notification de temperature.c
                                                            NULL,
                                                            0,
                                                            0);
 
 
                      app_log_info("la carte est notify par temperature \n");
-                     connectiontemp = evt->data.evt_gatt_server_characteristic_status.connection;
-                     characteristictemp = evt->data.evt_gatt_server_characteristic_status.characteristic;
+                     connectiontemp = evt->data.evt_gatt_server_characteristic_status.connection;//sauvegarde de la connexion utilisateur
+                     characteristictemp = evt->data.evt_gatt_server_characteristic_status.characteristic;//sauvegarde de la caracteristique
                      //app_log_info("La valeur recue est %d \n", evt->data.evt_gatt_server_characteristic_status.client_config_flags);
                  }
                  //
                  else{
-                     sl_sleeptimer_stop_timer(&my_handle);
+                     sl_sleeptimer_stop_timer(&my_handle);// fin des notifications
                  }
                  //app_log_info("La valeur recue est %d \n", evt->data.evt_gatt_server_characteristic_status.client_config_flags);
 
@@ -213,26 +213,26 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
 
          }
 
-         if(evt->data.evt_gatt_server_characteristic_status.characteristic == gattdb_irradiance_0){
-                      if(evt->data.evt_gatt_server_characteristic_status.status_flags == 0x01){
-                          if(evt->data.evt_gatt_server_characteristic_status.client_config_flags){
+         if(evt->data.evt_gatt_server_characteristic_status.characteristic == gattdb_irradiance_0){//notification vient d irradiance
+                      if(evt->data.evt_gatt_server_characteristic_status.status_flags == 0x01){//changement detecte (appui sur la cloche dans l app)
+                          if(evt->data.evt_gatt_server_characteristic_status.client_config_flags){//demande de notification
                               app_log_info("Coucou je suis irradiance\n");
                               sl_sleeptimer_start_periodic_timer_ms(&my_handle2,
                                                                     1000,
-                                                                    irradNotify,
+                                                                    irradNotify,//fonction de notification dans irradiance.c
                                                                     NULL,
                                                                     0,
                                                                     0);
 
 
                               app_log_info("la carte est notify par irradiance \n");
-                              connectionlum = evt->data.evt_gatt_server_characteristic_status.connection;
-                              characteristiclum = evt->data.evt_gatt_server_characteristic_status.characteristic;
+                              connectionlum = evt->data.evt_gatt_server_characteristic_status.connection;//sauvegarde de la connexion utilisateur
+                              characteristiclum = evt->data.evt_gatt_server_characteristic_status.characteristic;//sauvegarde de la caracteristique
                               //app_log_info("La valeur recue est %d \n", evt->data.evt_gatt_server_characteristic_status.client_config_flags);
                           }
                           //
                           else{
-                              sl_sleeptimer_stop_timer(&my_handle2);
+                              sl_sleeptimer_stop_timer(&my_handle2);//fin des notifications
                           }
                           //app_log_info("La valeur recue est %d \n", evt->data.evt_gatt_server_characteristic_status.client_config_flags);
 
@@ -241,45 +241,45 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
                   }
 
          break;
-
+//Ajout de la notification
     case sl_bt_evt_system_external_signal_id:
-      if(evt->data.evt_system_external_signal.extsignals == TEMPERATURE_TIMER_SIGNAL){
+      if(evt->data.evt_system_external_signal.extsignals == TEMPERATURE_TIMER_SIGNAL){//Signal de temperature recu
           temp = convertir_temp();
           app_log_info("temperature is : %d C\n",temp);
           sl_bt_gatt_server_send_notification(connectiontemp
-                                                    ,gattdb_temperature,sizeof(temp),(const uint8_t*)&temp);
+                                                    ,gattdb_temperature,sizeof(temp),(const uint8_t*)&temp);//envoi de la temperature periodiquement
       }
-      else if(evt->data.evt_system_external_signal.extsignals == IRRADIANCE_TIMER_SIGNAL){
+      else if(evt->data.evt_system_external_signal.extsignals == IRRADIANCE_TIMER_SIGNAL){//Signal d'irradiance recu
                 irradiance = irrad();
                 app_log_info("irradiance is : %d \n",(int)( 100*irradiance));
                 sl_bt_gatt_server_send_notification(connectionlum
-                                                          ,gattdb_irradiance_0,sizeof(irradiance),(const uint8_t*)&irradiance);
+                                                          ,gattdb_irradiance_0,sizeof(irradiance),(const uint8_t*)&irradiance);//envoi de l irradiance periodiquement
             }
       break;
-
+//Demande d'écriture
     case sl_bt_evt_gatt_server_user_write_request_id:
 
-      taille = evt->data.evt_gatt_server_user_write_request.value.len;
-      data = evt->data.evt_gatt_server_user_write_request.value.data;
+      taille = evt->data.evt_gatt_server_user_write_request.value.len;//taille de la valeur ecrite
+      data = evt->data.evt_gatt_server_user_write_request.value.data;//donnee ecrite
       for(int i = 0; i < taille; i++){
           if(data[i] == 1){
-              sl_led_led0.turn_on(sl_led_led0.context);
+              sl_led_led0.turn_on(sl_led_led0.context);//allume la led
           }
           else if(data[i] == 0){
-              sl_led_led0.turn_off(sl_led_led0.context);
+              sl_led_led0.turn_off(sl_led_led0.context);//eteint la led
           }
           app_log_info("Donnee : %d \n", data[i]);
           app_log_info("coucou la valeur c'est %d \n", evt->data.evt_gatt_server_user_write_request.att_opcode);
       }
       app_log_info("Coucou on ecrit !! \n");
-      if(evt->data.evt_gatt_server_user_write_request.att_opcode == sl_bt_gatt_write_request ){
+      if(evt->data.evt_gatt_server_user_write_request.att_opcode == sl_bt_gatt_write_request ){//regarde si ecrit avec reponse
           app_log_info("Response is requested");
           sl_bt_gatt_server_send_user_write_response(evt->data.evt_gatt_server_user_read_request.connection,
                                                           evt->data.evt_gatt_server_user_read_request.characteristic,
-                                                                      0);
+                                                                      0);//envoi la reponse pour pas que ca crash
 
       }
-      else if(evt->data.evt_gatt_server_user_write_request.att_opcode == sl_bt_gatt_write_command ){
+      else if(evt->data.evt_gatt_server_user_write_request.att_opcode == sl_bt_gatt_write_command ){//regarde si ecrit sans reponse
           app_log_info("No response required");
       }
 
